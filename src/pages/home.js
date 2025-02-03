@@ -51,51 +51,66 @@ const Home = () => {
   return (
     <div className="App">
       <div className="header">
-        WashU Archictectural Font
+        WashU Architectural Font
         <div className="button" onClick={() => navigate("/fullfont")}>
           Specimen
         </div>
       </div>
       <div id="text-main">
-        <Stage
-          width={window.innerWidth}
-          height={window.innerHeight * 0.4} // Set canvas height to 40% of the page height
-        >
+        <Stage width={window.innerWidth} height={window.innerHeight * 0.4}>
           <Layer>
-            {images.map((image, index) => {
-              const imageAspectRatio = image.height / image.width;
-              const height = 310;
-              const width = height / imageAspectRatio;
+            {(() => {
+              // 1. Compute total width of all images including spacing
+              const totalWidth = images.reduce((sum, image) => {
+                const imageAspectRatio = image.width / image.height;
+                const width = 151 * imageAspectRatio; // Maintain aspect ratio
+                return sum + width + 30; // Add width of image + spacing
+              }, -60); // Start at -60 to ignore the last extra gap
 
-              // Dynamically adjust the x-position based on the image width and a fixed gap
-              const gap = 20; // Space between the images
-              const xPosition = 50 + (index * (width + gap)); // Include the gap in the position
+              const startX = (window.innerWidth / 2) - (totalWidth / 2); // Centering Fix
 
-              return (
-                image && (
+              let currentX = startX; // Track x-position dynamically
+
+              return images.map((image, index) => {
+                const imageAspectRatio = image.width / image.height;
+                const height = 151; // Fixed height
+                const width = height * imageAspectRatio; // Maintain aspect ratio
+
+                const xPosition = currentX; // Store the current position
+                currentX += width + 30; // Move position for next image
+
+                return (
                   <KonvaImage
                     key={index}
                     image={image}
                     x={xPosition}
-                    y={10} // Adjust y for centering vertically within the Stage
-                    width={width} // Fixed width
-                    height={height} // Auto height based on the aspect ratio
+                    y={10} // Adjust as needed
+                    width={width}
+                    height={height}
                   />
-                )
-              );
-            })}
+                );
+              });
+            })()}
           </Layer>
         </Stage>
-        <div className="text-box-container">
-          <input
-            type="text"
-            id="input"
-            name="input"
-            placeholder="Type something..."
-            onChange={handleTextChange}
-            value={text}
-          />
+        
+        <div id="inputs">
+          <div className="text-box-container">
+            <input
+              type="text"
+              id="input"
+              name="input"
+              placeholder="Type something..."
+              onChange={handleTextChange}
+              value={text}
+            />
+          </div>
+          <div className="enter">
+          Enter
         </div>
+        </div>
+      
+        
       </div>
       <div className="footer">
         Designed by Mac Barnes <br />
