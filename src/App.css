@@ -71,12 +71,12 @@ img{
   overflow: hidden;
   object-fit: cover;
   width: 80%;
-  
+}
 
 .red{
   filter: invert(20%) sepia(100%) saturate(800%) hue-rotate(-35deg) brightness(80%);
 }
-}
+
 .footer {
   display: flex;
   justify-content: flex-end; /* Aligns text to the left */
