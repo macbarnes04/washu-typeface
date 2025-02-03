@@ -5,7 +5,7 @@ const Fullfont = () => {
     return (
         <div className="App">
         <div class="header">
-          WashU Archictectural Font
+          WashU Architectural Font
           <div class="button" onClick={() => navigate("/")}>Home</div>
         </div>
         <div id="text-main">

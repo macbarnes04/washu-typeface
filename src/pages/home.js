@@ -20,32 +20,18 @@ const Home = () => {
   const [text, setText] = useState("");
   const [images, setImages] = useState([]);
   const [isRed, setIsRed] = useState(false);
+  const [redStates, setRedStates] = useState([]);
   const imageRefs = useRef([]); // Store references to each Konva image
 
   const handleEnterClick = () => {
-    setIsRed((prevIsRed) => {
-      const newIsRed = !prevIsRed; // Correctly toggle the state
-  
-      imageRefs.current.forEach((imageNode) => {
-        if (imageNode) {
-          imageNode.cache();
-          imageNode.filters([Konva.Filters.RGBA]); // Apply the filter
-  
-          if (newIsRed) {
-            imageNode.red(186);
-            imageNode.green(12);
-            imageNode.blue(47);
-          } else {
-            imageNode.red(0);
-            imageNode.green(0);
-            imageNode.blue(0);
-          }
-  
-          imageNode.getLayer()?.batchDraw();
-        }
-      });
-  
-      return newIsRed; // Update the state
+    // Enter Click animations
+  };
+
+  const handleImageClick = (index) => {
+    setRedStates((prevRedStates) => {
+      const newRedStates = [...prevRedStates];
+      newRedStates[index] = !newRedStates[index]; // Toggle red state for clicked image
+      return newRedStates;
     });
   };
   
@@ -103,19 +89,43 @@ const Home = () => {
               let currentX = startX;
 
               return images.map((image, index) => {
-                const width = 251 * (image.width / image.height);
-                const xPosition = currentX;
-                currentX += width + 30;
+                const imageAspectRatio = image.width / image.height;
+                const height = 251; // Fixed height
+                const width = height * imageAspectRatio; // Maintain aspect ratio
+
+                const xPosition = currentX; // Store the current position
+                currentX += width + 30; // Move position for next image
+
+                const isRed = redStates[index]; // Get the red state for the current image
 
                 return (
                   <KonvaImage
                     key={index}
-                    ref={(el) => (imageRefs.current[index] = el)}
                     image={image}
                     x={xPosition}
                     y={10}
                     width={width}
-                    height={251}
+                    height={height}
+                    ref={(node) => {
+                      if (node) {
+                        if (isRed) {
+                          node.cache();
+                          node.filters([Konva.Filters.RGBA]); // Corrected import
+                          node.red(186);
+                          node.green(12);
+                          node.blue(47);
+                          node.getLayer()?.batchDraw();
+                        } else {
+                          node.cache();
+                          node.filters([Konva.Filters.RGBA]); // Reset filter
+                          node.red(0);
+                          node.green(0);
+                          node.blue(0);
+                          node.getLayer()?.batchDraw();
+                        }
+                      }
+                    }}
+                    onClick={() => handleImageClick(index)} // Add click handler for toggling red
                   />
                 );
               });
