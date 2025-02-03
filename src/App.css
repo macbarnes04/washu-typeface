@@ -35,6 +35,9 @@
   border: 4px solid #000000;
   box-sizing: border-box;
 }
+.button:hover{
+  cursor: pointer;
+}
 
 input[type="text"] {
   width: 100%;
@@ -52,8 +55,12 @@ img{
   overflow: hidden;
   object-fit: cover;
   width: 80%;
-}
+  
 
+.red{
+  filter: invert(20%) sepia(100%) saturate(800%) hue-rotate(-35deg) brightness(80%);
+}
+}
 .footer {
   display: flex;
   justify-content: flex-end; /* Aligns text to the left */
@@ -70,3 +77,16 @@ body {
 #alphabet{
   width: 100%;
 }
+
+/* Make sure the body takes the full height */
+
+/* This will ensure that the Stage and Layer are contained inside the page properly */
+#text-main {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 20%;
+  width: 100%; /* Ensure the Stage spans the entire width */
+}
+
+/* Optional: Add some margin to the footer if needed */

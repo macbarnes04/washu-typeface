@@ -4,8 +4,10 @@
   "private": true,
   "dependencies": {
     "cra-template": "1.2.0",
+    "konva": "^9.3.18",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-konva": "^18.2.10",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
     "web-vitals": "^4.2.4"
