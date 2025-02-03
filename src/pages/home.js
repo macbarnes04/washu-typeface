@@ -50,23 +50,35 @@ const Home = () => {
   };
   
 
-  // Load images dynamically based on the text input
   useEffect(() => {
-    const letterImages = text.split("").map((letter) => `/letters/${letter.toUpperCase()}.png`);
-
+    // Clear images if text is empty
+    if (text === "") {
+      setImages([]);
+      return; // Don't try to load images if there's no text
+    }
+  
+    const letterImages = text.split("").map((letter) => {
+      const imageSrc = `/letters/${letter.toUpperCase()}.png`; // Corrected path to images
+      return imageSrc;
+    });
+  
+    // Load the images asynchronously
     const loadImages = async () => {
       try {
-        const loadedImages = await Promise.all(letterImages.map((src) => loadImage(src)));
-        setImages(loadedImages);
+        const loadedImages = await Promise.all(
+          letterImages.map((src) => loadImage(src))
+        );
+        setImages(loadedImages); // Update the state once all images are loaded
       } catch (error) {
         console.error("Error loading images:", error);
       }
     };
-
+  
     if (letterImages.length > 0) {
       loadImages();
     }
-  }, [text]);
+  }, [text]); // Re-run when text changes
+  
 
   const handleTextChange = (e) => setText(e.target.value);
 
