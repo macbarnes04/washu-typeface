@@ -51,6 +51,7 @@ img{
   height: auto;
   overflow: hidden;
   object-fit: cover;
+  width: 80%;
 }
 
 .footer {
@@ -60,4 +61,12 @@ img{
   padding: 20px;
   color: rgb(56, 56, 56);
   font-size: 24px;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+}
+
+#alphabet{
+  width: 100%;
 }

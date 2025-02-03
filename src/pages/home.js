@@ -7,10 +7,10 @@ const Home = () => {
       <div className="App">
         <div class="header">
           WashU Archictectural Font
-          <div class="button" onClick={() => navigate("/fullfont")}>Full Font</div>
+          <div class="button" onClick={() => navigate("/fullfont")}>Specimen</div>
         </div>
         <div id="text-main">
-          <img src="./public/images/hambergevons.png" alt="Hambergevons" />
+          <img src="/images/hambergevons.png" alt="Hambergevons" />
           <div class="text-box-container">
             <input type="text" id="input" name="input" placeholder="Type something..."/>
           </div>

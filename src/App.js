@@ -8,7 +8,7 @@ import './App.css';
     return (
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/fullfont" element={<FullFont />} />
+        <Route path="/Fullfont" element={<FullFont />} />
       </Routes>
     );
   }

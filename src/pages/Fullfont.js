@@ -6,10 +6,10 @@ const Fullfont = () => {
         <div className="App">
         <div class="header">
           WashU Archictectural Font
-          <div class="button" onClick={() => navigate("/")}>home</div>
+          <div class="button" onClick={() => navigate("/")}>Home</div>
         </div>
         <div id="text-main">
-          <img src="./public/images/alphabet.png" alt=" "></img>
+        <img id='alphabet' src="/images/alphabet.png" alt="Alphabet" />
         </div>
         <div className="footer">
           Designed by Mac Barnes <br />
