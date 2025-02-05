@@ -22,6 +22,15 @@ const Home = () => {
   const [positions, setPositions] = useState([]); // Separate positions state
   const imageRefs = useRef([]); // Store references to each Konva image
 
+  const handleKeyPress = (event) => {
+    const key = event.key; // Get the key being pressed
+
+    // Check if the key is a letter (a-z or A-Z)
+    if (!/^[a-zA-Z]$/.test(key)) {
+        event.preventDefault(); // Prevent non-alphabet characters from being typed
+    }
+};
+
   const handleImageClick = (index) => {
     setRedStates((prevRedStates) => {
       const newRedStates = [...prevRedStates];
@@ -117,20 +126,24 @@ const Home = () => {
     setPositions((prevPositions) =>
       prevPositions.map((_, index) => {
         if (index >= availablePositions.length) return { x: 0, y: 0 }; // Fallback
-    
+      
         const { x: gridX, y: gridY } = availablePositions[index];
-    
-        // Increase the range for random variation
+  
+        // Add more variability in positions for the first few letters and beyond
         const randomX = Math.random() * 60 - 30; // Random X variation (-30 to 30)
         const randomY = Math.random() * 40 - 20; // Random Y variation (-20 to 20)
+        
+        // Adjust the Y positioning further for the bottom-most rows
+        const adjustedY = gridY * boxHeight + randomY;
   
         return {
           x: gridX * boxWidth + offsetX + randomX,
-          y: gridY * boxHeight + randomY,
+          y: adjustedY,
         };
       })
     );
   };
+  
   
    
 
@@ -188,11 +201,12 @@ const Home = () => {
         <div id="inputs">
           <div className="text-box-container">
             <input
-              type="text"
-              id="input"
-              placeholder="Type something..."
-              onChange={handleTextChange}
-              value={text}
+                type="text"
+                id="input"
+                placeholder="Type something..."
+                onChange={handleTextChange}
+                onKeyPress={handleKeyPress} // Add this to prevent non-alphabet characters
+                value={text}
             />
           </div>
           <div className="enter" onClick={handleEnterClick}>Enter</div>
