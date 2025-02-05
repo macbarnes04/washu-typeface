@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
-import { Stage, Layer, Image as KonvaImage } from "react-konva";
+import { Stage, Layer, Image as KonvaImage, Rect, Circle } from "react-konva";
 import Konva from "konva";  // Import Konva for filters
 
 // Function to load a single image
@@ -20,16 +20,18 @@ const Home = () => {
   const [images, setImages] = useState([]);
   const [redStates, setRedStates] = useState([]);
   const [positions, setPositions] = useState([]); // Separate positions state
+  const [greenShapes, setGreenShapes] = useState([]); // Store green rectangles and circles
   const imageRefs = useRef([]); // Store references to each Konva image
+  const layerRef = useRef(null); // Store layer reference for batch drawing
 
   const handleKeyPress = (event) => {
     const key = event.key; // Get the key being pressed
 
     // Check if the key is a letter (a-z or A-Z)
     if (!/^[a-zA-Z]$/.test(key)) {
-        event.preventDefault(); // Prevent non-alphabet characters from being typed
+      event.preventDefault(); // Prevent non-alphabet characters from being typed
     }
-};
+  };
 
   const handleImageClick = (index) => {
     setRedStates((prevRedStates) => {
@@ -96,12 +98,12 @@ const Home = () => {
   const handleEnterClick = () => {
     const boxWidth = 300;  // Fixed width of each letter block
     const boxHeight = 301; // Fixed height of each letter block (251 height + 50 padding)
-    
+
     const gridCols = Math.floor(window.innerWidth / boxWidth);
     const gridRows = Math.floor(window.innerHeight / boxHeight);
-    
+
     if (gridCols <= 0 || gridRows <= 0) return; // Safety check
-    
+
     // Calculate available positions for the grid
     let availablePositions = [];
     for (let y = 0; y < gridRows; y++) {
@@ -109,43 +111,149 @@ const Home = () => {
         availablePositions.push({ x, y });
       }
     }
-  
+
     // Shuffle grid positions for random placement
     availablePositions = availablePositions.sort(() => Math.random() - 0.5);
-  
+
     // Calculate the offset to center the grid horizontally
     const offsetX = (window.innerWidth - gridCols * boxWidth) / 2;
-  
+
     // Calculate the remaining vertical space and move it to the bottom
     const totalGridHeight = gridRows * boxHeight;
     const remainingVerticalSpace = window.innerHeight - totalGridHeight;
-  
+
     // Distribute any extra vertical margin at the bottom
     const offsetY = remainingVerticalSpace > 0 ? remainingVerticalSpace : 0;
-  
+
+    // Save positions of buildings in state
     setPositions((prevPositions) =>
       prevPositions.map((_, index) => {
         if (index >= availablePositions.length) return { x: 0, y: 0 }; // Fallback
-      
+
         const { x: gridX, y: gridY } = availablePositions[index];
-  
+
         // Add more variability in positions for the first few letters and beyond
         const randomX = Math.random() * 60 - 30; // Random X variation (-30 to 30)
         const randomY = Math.random() * 40 - 20; // Random Y variation (-20 to 20)
-        
+
         // Adjust the Y positioning further for the bottom-most rows
         const adjustedY = gridY * boxHeight + randomY;
-  
+
         return {
           x: gridX * boxWidth + offsetX + randomX,
           y: adjustedY,
         };
       })
     );
+
+    // Generate random green rectangles and circles
+    const greenShapes = generateGreenShapes();
+    setGreenShapes(greenShapes);
+
+    // Now that positions have been updated, call the drawPaths function
+    if (layerRef.current) {
+      layerRef.current.batchDraw();
+    }
   };
-  
-  
-   
+
+  const generateGreenShapes = () => {
+    const shapes = [];
+    const numRectangles = 7; // Number of random rectangles
+    const numClusters = 10; // Number of clusters of circles
+
+    const existingShapes = []; // Track existing shapes' bounding boxes
+
+    // Helper function to check if a new shape overlaps with existing shapes
+    const isOverlapping = (newShape) => {
+      return existingShapes.some(shape => {
+        return (
+          newShape.x < shape.x + shape.width &&
+          newShape.x + newShape.width > shape.x &&
+          newShape.y < shape.y + shape.height &&
+          newShape.y + newShape.height > shape.y
+        );
+      });
+    };
+
+    // Generate rectangles (larger size)
+    for (let i = 0; i < numRectangles; i++) {
+      const width = Math.random() * 100 + 300;  // Random width (between 300 and 900)
+      const height = Math.random() * 300 + 100;  // Random height (between 150 and 450)
+      let x, y;
+
+      // Ensure the rectangle doesn't overlap with existing shapes
+      let attempts = 0;
+      do {
+        x = Math.random() * (window.innerWidth - width);  // Random X position
+        y = Math.random() * (window.innerHeight - height); // Random Y position
+        attempts++;
+        if (attempts > 100) break; // Avoid infinite loop
+      } while (isOverlapping({ x, y, width, height }));
+
+      shapes.push(
+        <Rect
+          key={`rect-${i}`}
+          x={x}
+          y={y}
+          width={width}
+          height={height}
+          fill="green"
+          cornerRadius={15}
+          opacity={0.5}
+          zIndex={-100} // Ensures rectangles are behind other elements
+        />
+      );
+
+      // Add the rectangle's bounding box to the list of existing shapes
+      existingShapes.push({ x, y, width, height });
+    }
+
+    // Generate clusters of circles (smaller size)
+    for (let i = 0; i < numClusters; i++) {
+      let clusterX = Math.random() * window.innerWidth;  // Random cluster X position
+      let clusterY = Math.random() * window.innerHeight; // Random cluster Y position
+
+      // Add a few circles to each cluster
+      for (let j = 0; j < 1 + Math.floor(Math.random() * 2); j++) { // 3 to 4 circles per cluster
+        const radius = Math.random() * 15 + 20;  // Random radius (between 20 and 35)
+        let x = clusterX + Math.random() * 50 - 25; // Random offset in X
+        let y = clusterY + Math.random() * 50 - 25; // Random offset in Y
+
+        // Ensure no overlap with existing circles or rectangles
+        let attempts = 0;
+        do {
+          x = clusterX + Math.random() * 50 - 25;
+          y = clusterY + Math.random() * 50 - 25;
+          attempts++;
+          if (attempts > 100) break; // Avoid infinite loop
+        } while (isOverlapping({ x, y, width: radius * 2, height: radius * 2 }));
+
+        shapes.push(
+          <Circle
+            key={`circle-${i}-${j}`}
+            x={x}
+            y={y}
+            radius={radius}
+            fill="darkgreen"
+            opacity={.8}
+            zIndex={-1} // Ensures circles are behind other elements
+          />
+        );
+
+        // Add the circle's bounding box to the existing shapes
+        existingShapes.push({
+          x: x - radius,
+          y: y - radius,
+          width: radius * 2,
+          height: radius * 2
+        });
+      }
+    }
+
+    return shapes;
+  };
+
+
 
   return (
     <div className="App">
@@ -153,10 +261,14 @@ const Home = () => {
         WashU Architectural Font
         <div className="button" onClick={() => navigate("/fullfont")}>Specimen</div>
       </div>
-      
+
       <div id="text-main">
         <Stage width={window.innerWidth - 100} height={window.innerHeight * 0.7}>
-          <Layer>
+          <Layer ref={layerRef}>
+            {/* Render green rectangles and circle clusters first */}
+            {greenShapes}
+
+            {/* Render images */}
             {images.map((image, index) => {
               const imageAspectRatio = image.width / image.height;
               const height = 251; // Fixed height
@@ -198,15 +310,16 @@ const Home = () => {
           </Layer>
         </Stage>
 
+
         <div id="inputs">
           <div className="text-box-container">
             <input
-                type="text"
-                id="input"
-                placeholder="Type something..."
-                onChange={handleTextChange}
-                onKeyPress={handleKeyPress} // Add this to prevent non-alphabet characters
-                value={text}
+              type="text"
+              id="input"
+              placeholder="One word to describe WashU's Campus..."
+              onChange={handleTextChange}
+              onKeyPress={handleKeyPress} // Add this to prevent non-alphabet characters
+              value={text}
             />
           </div>
           <div className="enter" onClick={handleEnterClick}>Enter</div>
