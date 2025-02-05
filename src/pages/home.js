@@ -85,45 +85,54 @@ const Home = () => {
   };
 
   const handleEnterClick = () => {
-    // Randomize each image's position independently
+    const boxWidth = 300;  // Fixed width of each letter block
+    const boxHeight = 301; // Fixed height of each letter block (251 height + 50 padding)
+    
+    const gridCols = Math.floor(window.innerWidth / boxWidth);
+    const gridRows = Math.floor(window.innerHeight / boxHeight);
+    
+    if (gridCols <= 0 || gridRows <= 0) return; // Safety check
+    
+    // Calculate available positions for the grid
+    let availablePositions = [];
+    for (let y = 0; y < gridRows; y++) {
+      for (let x = 0; x < gridCols; x++) {
+        availablePositions.push({ x, y });
+      }
+    }
+  
+    // Shuffle grid positions for random placement
+    availablePositions = availablePositions.sort(() => Math.random() - 0.5);
+  
+    // Calculate the offset to center the grid horizontally
+    const offsetX = (window.innerWidth - gridCols * boxWidth) / 2;
+  
+    // Calculate the remaining vertical space and move it to the bottom
+    const totalGridHeight = gridRows * boxHeight;
+    const remainingVerticalSpace = window.innerHeight - totalGridHeight;
+  
+    // Distribute any extra vertical margin at the bottom
+    const offsetY = remainingVerticalSpace > 0 ? remainingVerticalSpace : 0;
+  
     setPositions((prevPositions) =>
       prevPositions.map((_, index) => {
-        const imageWidth = images[index].width; // Get the image width
-        const imageHeight = 251; // Fixed height
+        if (index >= availablePositions.length) return { x: 0, y: 0 }; // Fallback
+    
+        const { x: gridX, y: gridY } = availablePositions[index];
+    
+        // Increase the range for random variation
+        const randomX = Math.random() * 60 - 30; // Random X variation (-30 to 30)
+        const randomY = Math.random() * 40 - 20; // Random Y variation (-20 to 20)
   
-        let newX, newY;
-        let overlapDetected;
-  
-        do {
-          overlapDetected = false;
-  
-          // Randomly generate a new position within bounds
-          newX = Math.random() * (window.innerWidth - imageWidth);
-          newY = Math.random() * (window.innerHeight * 0.6 - imageHeight);
-  
-          // Check for overlap with previously placed images
-          for (let i = 0; i < index; i++) {
-            const otherX = prevPositions[i].x;
-            const otherY = prevPositions[i].y;
-  
-            const isOverlapping =
-              newX < otherX + images[i].width &&
-              newX + imageWidth > otherX &&
-              newY < otherY + imageHeight &&
-              newY + imageHeight > otherY;
-  
-            if (isOverlapping) {
-              overlapDetected = true; // Mark overlap detected
-              break; // Exit the loop to retry position
-            }
-          }
-        } while (overlapDetected); // Keep generating until no overlap
-  
-        return { x: newX, y: newY };
+        return {
+          x: gridX * boxWidth + offsetX + randomX,
+          y: gridY * boxHeight + randomY,
+        };
       })
     );
   };
   
+   
 
   return (
     <div className="App">
@@ -133,7 +142,7 @@ const Home = () => {
       </div>
       
       <div id="text-main">
-        <Stage width={window.innerWidth} height={window.innerHeight * 0.6}>
+        <Stage width={window.innerWidth - 100} height={window.innerHeight * 0.7}>
           <Layer>
             {images.map((image, index) => {
               const imageAspectRatio = image.width / image.height;
