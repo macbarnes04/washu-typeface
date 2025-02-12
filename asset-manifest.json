@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/washu-typeface/static/css/main.9e80362a.css",
-    "main.js": "/washu-typeface/static/js/main.f07d0875.js",
+    "main.js": "/washu-typeface/static/js/main.8f03950a.js",
     "index.html": "/washu-typeface/index.html",
     "main.9e80362a.css.map": "/washu-typeface/static/css/main.9e80362a.css.map",
-    "main.f07d0875.js.map": "/washu-typeface/static/js/main.f07d0875.js.map"
+    "main.8f03950a.js.map": "/washu-typeface/static/js/main.8f03950a.js.map"
   },
   "entrypoints": [
     "static/css/main.9e80362a.css",
-    "static/js/main.f07d0875.js"
+    "static/js/main.8f03950a.js"
   ]
 }
