@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { Stage, Layer, Image as KonvaImage, Rect, Circle } from "react-konva";
+import { Shape } from "react-konva";
 import Konva from "konva";  // Import Konva for filters
 
 // Function to load a single image
@@ -14,6 +15,46 @@ const loadImage = (src) => {
   });
 };
 
+// const Midpoint = ({ positions }) => {
+//   if (!positions || Object.keys(positions).length === 0) return null;
+
+//   return (
+//     <>
+//       {Object.entries(positions).map(([letter, letterPositions]) => {
+//         if (!letterPositions.length) return null;
+
+//         // Compute midpoint for this letter
+//         let sumX = 0,
+//           sumY = 0;
+//         letterPositions.forEach(({ x, y }) => {
+//           sumX += x;
+//           sumY += y;
+//         });
+
+//         const midX = sumX / letterPositions.length;
+//         const midY = sumY / letterPositions.length;
+
+//         return (
+//           <Circle
+//             key={letter}
+//             x={midX}
+//             y={midY}
+//             radius={5}
+//             fill="red"
+//           />
+//         );
+//       })}
+//     </>
+//   );
+// };
+const getMidpoint = (image, position) => {
+  const midpointX = position.x + (image.width / 2);
+  const midpointY = position.y + (image.height / 2);
+  return { x: midpointX, y: midpointY };
+};
+
+
+
 const Home = () => {
   const navigate = useNavigate();
   const [text, setText] = useState("");
@@ -23,6 +64,37 @@ const Home = () => {
   const [greenShapes, setGreenShapes] = useState([]); // Store green rectangles and circles
   const imageRefs = useRef([]); // Store references to each Konva image
   const layerRef = useRef(null); // Store layer reference for batch drawing
+  const [pathVisible, setPathVisible] = useState(false); // Path visibility flag
+
+  const descriptions = [
+    "Location for A",
+    "Location for B",
+    "Location for C",
+    "Location for D",
+    "Location for E",
+    "Location for F",
+    "Location for G",
+    "Location for H",
+    "Location for I",
+    "Location for J",
+    "Location for K",
+    "Location for L",
+    "Location for M",
+    "Location for N",
+    "Location for O",
+    "Location for P",
+    "Location for Q",
+    "Location for R",
+    "Location for S",
+    "Location for T",
+    "Location for U",
+    "Location for V",
+    "Location for W",
+    "Location for X",
+    "Location for Y",
+    "Location for Z"
+  ];
+  
 
   const handleKeyPress = (event) => {
     const key = event.key; // Get the key being pressed
@@ -101,6 +173,7 @@ const Home = () => {
 
     const gridCols = Math.floor(window.innerWidth / boxWidth);
     const gridRows = Math.floor(window.innerHeight / boxHeight);
+    setPathVisible(true);
 
     if (gridCols <= 0 || gridRows <= 0) return; // Safety check
 
@@ -253,7 +326,52 @@ const Home = () => {
     return shapes;
   };
 
+  const drawPath = () => {
+    if (!layerRef.current) return;
 
+    const points = [];
+    images.forEach((image, index) => {
+      const { x, y } = positions[index] || { x: 0, y: 0 };
+      const midpoint = getMidpoint(image, { x, y });
+      console.log(midpoint); // Check the values of the midpoints
+      points.push(midpoint.x, midpoint.y);
+    });
+
+    const path = new Konva.Line({
+      points: points,
+      stroke: '#E5D3B3',
+      strokeWidth: 0,
+      lineJoin: 'round',
+      lineCap: 'round',
+    });
+
+    if (pathVisible) {
+      path.to({
+        strokeWidth: 20,
+        duration: 1,
+        onFinish: () => {
+          layerRef.current.batchDraw(); // Redraw the layer after animation
+        },
+      });
+    }
+
+    return path;
+  };
+
+  useEffect(() => {
+    const path = drawPath(); // Create the path
+    if (path) {
+      layerRef.current.add(path); // Add the path to the layer
+      layerRef.current.batchDraw(); // Redraw the layer after adding the path
+    }
+
+    // Cleanup function to remove the path when component is unmounted or dependencies change
+    return () => {
+      if (path) {
+        path.destroy(); // Destroy the path to prevent memory leaks
+      }
+    };
+  }, [images, positions, pathVisible]);
 
   return (
     <div className="App">
@@ -265,9 +383,7 @@ const Home = () => {
       <div id="text-main">
         <Stage width={window.innerWidth - 100} height={window.innerHeight * 0.7}>
           <Layer ref={layerRef}>
-            {/* Render green rectangles and circle clusters first */}
             {greenShapes}
-
             {/* Render images */}
             {images.map((image, index) => {
               const imageAspectRatio = image.width / image.height;
@@ -305,11 +421,11 @@ const Home = () => {
                   }}
                   onClick={() => handleImageClick(index)} // Add click handler for toggling red
                 />
+                
               );
             })}
           </Layer>
         </Stage>
-
 
         <div id="inputs">
           <div className="text-box-container">
@@ -335,4 +451,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Home;  
